@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroMed AI | Advanced Clinical Decision Support</title>
+
+    <!-- Bootstrap 5 CDN -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    />
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-dark: #0d3b66;
+            --primary-blue: #1a6fb0;
+            --secondary-blue: #2a8dd4;
+            --accent-teal: #00b4b3;
+            --accent-purple: #8a4fff;
+            --light-blue: #e8f4fc;
+            --dark-gray: #1a202c;
+            --medium-gray: #4a5568;
+            --light-gray: #f8fafc;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+            --border-radius: 16px;
+            --box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 30px 60px rgba(0, 0, 0, 0.12);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark-gray);
+            line-height: 1.7;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(26, 111, 176, 0.03) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 180, 179, 0.03) 0%, transparent 20%);
+            z-index: -1;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--box-shadow-hover);
+        }
+        
+        /* Advanced Header */
+        .clinical-header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 50%, var(--accent-teal) 100%);
+            color: white;
+            padding: 3rem 0;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            margin-bottom: 3rem;
+            box-shadow: 0 15px 35px rgba(13, 59, 102, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .clinical-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .clinical-header h1 {
+            color: white;
+            font-size: 2.8rem;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .clinical-header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+        }
+        
+        /* System Status Panel */
+        .system-status {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .status-pulse {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success-green);
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        
+        /* Form Styling */
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--light-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .section-title i {
+            color: var(--accent-teal);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.85rem 1.25rem;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: white;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-teal);
+            box-shadow: 0 0 0 4px rgba(0, 180, 179, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Vital Signs Dashboard */
+        .vitals-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .vital-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .vital-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-teal), var(--secondary-blue));
+        }
+        
+        .vital-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .vital-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--light-blue), white);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            box-shadow: 0 5px 15px rgba(26, 111, 176, 0.1);
+        }
+        
+        .vital-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 0.5rem 0;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .vital-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .status-normal { background: rgba(16, 185, 129, 0.1); color: var(--success-green); }
+        .status-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning-orange); }
+        .status-critical { background: rgba(239, 68, 68, 0.1); color: var(--danger-red); }
+        
+        /* Action Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-teal));
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 2.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            box-shadow: 0 10px 25px rgba(26, 111, 176, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(26, 111, 176, 0.35);
+        }
+        
+        .btn-secondary {
+            background: white;
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+            border-radius: 10px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--light-blue);
+            transform: translateY(-3px);
+        }
+        
+        /* Analytics Dashboard */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Results Dashboard */
+        .risk-indicator {
+            text-align: center;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin: 2rem 0;
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        
+        .risk-score {
+            font-size: 5rem;
+            font-weight: 800;
+            font-family: 'Poppins', sans-serif;
+            margin: 1rem 0;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .recommendation-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent-teal);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        
+        .recommendation-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 0.35rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+        
+        .priority-high { background: rgba(239, 68, 68, 0.1); color: var(--danger-red); }
+        .priority-medium { background: rgba(245, 158, 11, 0.1); color: var(--warning-orange); }
+        .priority-low { background: rgba(16, 185, 129, 0.1); color: var(--success-green); }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.7rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary-blue), var(--accent-teal));
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -2rem;
+            top: 0.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--light-blue);
+        }
+        
+        .timeline-content {
+            background: var(--light-blue);
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        /* Drug Interaction Styles */
+        .interaction-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .interaction-high { border-left-color: var(--danger-red); }
+        .interaction-medium { border-left-color: var(--warning-orange); }
+        .interaction-low { border-left-color: var(--success-green); }
+        
+        /* Printable Report */
+        .printable-report {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            margin: 3rem 0;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            position: relative;
+            display: none;
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .report-logo {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .report-title {
+            font-size: 2rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .report-subtitle {
+            color: var(--medium-gray);
+            font-size: 1.1rem;
+        }
+        
+        .report-footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            color: var(--medium-gray);
+        }
+        
+        .signature-line {
+            margin-top: 4rem;
+            padding-top: 1rem;
+            border-top: 1px solid #cbd5e0;
+            width: 300px;
+            text-align: center;
+        }
+        
+        /* Loading Animation */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ai-loader {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .ai-loader div {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 8px solid transparent;
+            border-top-color: var(--accent-teal);
+            border-radius: 50%;
+            animation: spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        
+        .ai-loader div:nth-child(2) {
+            border: 8px solid transparent;
+            border-bottom-color: var(--primary-blue);
+            animation: spinReverse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); border-width: 8px; }
+            50% { transform: rotate(180deg); border-width: 2px; }
+            100% { transform: rotate(360deg); border-width: 8px; }
+        }
+        
+        @keyframes spinReverse {
+            0% { transform: rotate(0deg); border-width: 2px; }
+            50% { transform: rotate(180deg); border-width: 8px; }
+            100% { transform: rotate(360deg); border-width: 2px; }
+        }
+        
+        /* Predictive Score Cards */
+        .score-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-top: 4px solid;
+        }
+        
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .score-label {
+            font-size: 0.9rem;
+            color: var(--medium-gray);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .clinical-header {
+                padding: 2rem 0;
+                text-align: center;
+            }
+            
+            .clinical-header h1 {
+                font-size: 2rem;
+            }
+            
+            .system-status {
+                position: static;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+            
+            .vitals-dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            .printable-report, .printable-report * {
+                visibility: visible;
+            }
+            
+            .printable-report {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 2rem;
+                box-shadow: none;
+                border: none;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Advanced Clinical Header -->
+    <div class="clinical-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1><i class="fas fa-brain me-2"></i>NeuroMed AI Clinical System</h1>
+                    <p class="subtitle">Advanced AI-powered clinical decision support with predictive analytics and comprehensive reporting</p>
+                    <div class="mt-4">
+                        <span class="badge bg-light text-primary me-2"><i class="fas fa-shield-alt me-1"></i> HIPAA Compliant</span>
+                        <span class="badge bg-light text-primary me-2"><i class="fas fa-bolt me-1"></i> Real-time Analysis</span>
+                        <span class="badge bg-light text-primary"><i class="fas fa-chart-line me-1"></i> Predictive Analytics</span>
+                    </div>
+                </div>
+                <div class="system-status d-none d-md-flex">
+                    <div class="status-pulse"></div>
+                    <span class="text-white">System Active • AI Model v2.4</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Patient Intake Form -->
+        <div class="glass-card mb-5">
+            <div class="card-body p-4">
+                <h3 class="mb-4"><i class="fas fa-user-plus me-2"></i>Patient Assessment</h3>
+                
+                <form id="clinicalForm">
+                    <div class="row g-4">
+                        <!-- Patient Demographics -->
+                        <div class="col-lg-4">
+                            <div class="form-section">
+                                <h5 class="section-title"><i class="fas fa-id-card"></i> Demographics</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Patient ID</label>
+                                    <input type="text" class="form-control" id="patient_id" placeholder="MED-2023-001" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Age</label>
+                                        <input type="number" class="form-control" id="age" min="0" max="120" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Gender</label>
+                                        <select class="form-select" id="gender" required>
+                                            <option value="">Select</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label class="form-label">Weight (kg)</label>
+                                    <input type="number" class="form-control" id="weight" min="0" step="0.1">
+                                </div>
+                                <div class="mt-3">
+                                    <label class="form-label">Height (cm)</label>
+                                    <input type="number" class="form-control" id="height" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Medical History -->
+                        <div class="col-lg-4">
+                            <div class="form-section">
+                                <h5 class="section-title"><i class="fas fa-history"></i> Medical History</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Allergies</label>
+                                    <textarea class="form-control" id="allergies" rows="2" placeholder="List known allergies"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Current Medications</label>
+                                    <textarea class="form-control" id="medications" rows="2" placeholder="Current medications"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Past Conditions</label>
+                                    <textarea class="form-control" id="past_conditions" rows="2" placeholder="Previous medical conditions"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Presenting Symptoms -->
+                        <div class="col-lg-4">
+                            <div class="form-section">
+                                <h5 class="section-title"><i class="fas fa-stethoscope"></i> Presenting Symptoms</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Primary Complaint</label>
+                                    <textarea class="form-control" id="symptoms" rows="4" placeholder="Describe symptoms, onset, duration, severity..." required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Pain Level (1-10)</label>
+                                    <input type="range" class="form-range" id="pain_level" min="1" max="10" value="1">
+                                    <div class="d-flex justify-content-between">
+                                        <small>Mild</small>
+                                        <small id="painValue">1</small>
+                                        <small>Severe</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vital Signs Dashboard -->
+                    <div class="form-section">
+                        <h5 class="section-title"><i class="fas fa-heartbeat"></i> Vital Signs</h5>
+                        <div class="vitals-dashboard">
+                            <div class="vital-card">
+                                <div class="vital-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="vital-label">Heart Rate</div>
+                                <div class="vital-value" id="hrDisplay">--</div>
+                                <div class="vital-unit">bpm</div>
+                                <input type="number" class="form-control mt-3" id="heart_rate" min="30" max="200" placeholder="Enter value">
+                                <div class="vital-status status-normal mt-2">Normal</div>
+                            </div>
+                            
+                            <div class="vital-card">
+                                <div class="vital-icon">
+                                    <i class="fas fa-tint"></i>
+                                </div>
+                                <div class="vital-label">Blood Pressure</div>
+                                <div class="vital-value" id="bpDisplay">--/--</div>
+                                <div class="vital-unit">mmHg</div>
+                                <input type="text" class="form-control mt-3" id="blood_pressure" placeholder="120/80">
+                                <div class="vital-status status-normal mt-2">Normal</div>
+                            </div>
+                            
+                            <div class="vital-card">
+                                <div class="vital-icon">
+                                    <i class="fas fa-thermometer-half"></i>
+                                </div>
+                                <div class="vital-label">Temperature</div>
+                                <div class="vital-value" id="tempDisplay">--</div>
+                                <div class="vital-unit">°C</div>
+                                <input type="number" step="0.1" class="form-control mt-3" id="temperature" min="34" max="42" placeholder="36.8">
+                                <div class="vital-status status-normal mt-2">Normal</div>
+                            </div>
+                            
+                            <div class="vital-card">
+                                <div class="vital-icon">
+                                    <i class="fas fa-lungs"></i>
+                                </div>
+                                <div class="vital-label">O₂ Saturation</div>
+                                <div class="vital-value" id="oxygenDisplay">--</div>
+                                <div class="vital-unit">%</div>
+                                <input type="number" class="form-control mt-3" id="oxygen_saturation" min="70" max="100" placeholder="98">
+                                <div class="vital-status status-normal mt-2">Normal</div>
+                            </div>
+                            
+                            <div class="vital-card">
+                                <div class="vital-icon">
+                                    <i class="fas fa-weight"></i>
+                                </div>
+                                <div class="vital-label">Respiratory Rate</div>
+                                <div class="vital-value" id="respDisplay">--</div>
+                                <div class="vital-unit">breaths/min</div>
+                                <input type="number" class="form-control mt-3" id="respiratory_rate" min="8" max="40" placeholder="16">
+                                <div class="vital-status status-normal mt-2">Normal</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div>
+                            <button type="button" class="btn btn-secondary me-2" id="demoBtn">
+                                <i class="fas fa-vial me-2"></i>Load Demo Case
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="clearBtn">
+                                <i class="fas fa-eraser me-2"></i>Clear All
+                            </button>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-brain me-2"></i>Run AI Analysis
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading-container d-none">
+            <div class="ai-loader">
+                <div></div>
+                <div></div>
+            </div>
+            <h3 class="mb-3">AI Analyzing Clinical Data</h3>
+            <p class="text-muted text-center">Processing symptoms, vital signs, and medical history<br>Running predictive algorithms and differential diagnosis</p>
+            <div class="progress mt-4" style="width: 300px; height: 8px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error" class="alert alert-danger d-none" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span id="errorMessage"></span>
+        </div>
+
+        <!-- Results Dashboard -->
+        <div id="result" class="d-none">
+            <!-- Risk Assessment -->
+            <div class="glass-card mb-5">
+                <div class="card-body p-4">
+                    <div class="risk-indicator">
+                        <h4 class="mb-3">Clinical Risk Assessment</h4>
+                        <div class="risk-score" id="riskScore">72</div>
+                        <div class="risk-badge" id="riskBadge">
+                            <span class="badge bg-warning fs-5 px-4 py-2">MODERATE RISK</span>
+                        </div>
+                        <p class="mt-3 text-muted">Based on comprehensive analysis of patient data</p>
+                    </div>
+                    
+                    <div class="analytics-grid">
+                        <div class="chart-container">
+                            <h6 class="mb-3">Risk Factors Distribution</h6>
+                            <canvas id="riskChart" height="200"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h6 class="mb-3">Vital Signs Analysis</h6>
+                            <canvas id="vitalsChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Enhanced Features Section -->
+            <div class="glass-card mb-5">
+                <div class="card-body p-4">
+                    <h4 class="mb-4"><i class="fas fa-chart-network me-2"></i>Advanced Analytics</h4>
+                    
+                    <!-- Predictive Scores -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="score-card" style="border-top-color: var(--danger-red);">
+                                <h6>GRACE Score</h6>
+                                <div class="score-value" id="graceScore">145</div>
+                                <div class="score-label">ACS Mortality Risk</div>
+                                <div class="mt-2">
+                                    <span class="badge bg-danger">High Risk</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="score-card" style="border-top-color: var(--warning-orange);">
+                                <h6>Wells Score</h6>
+                                <div class="score-value" id="wellsScore">4.5</div>
+                                <div class="score-label">PE Probability</div>
+                                <div class="mt-2">
+                                    <span class="badge bg-warning">Moderate</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="score-card" style="border-top-color: var(--accent-teal);">
+                                <h6>Severity Index</h6>
+                                <div class="score-value" id="severityScore">78</div>
+                                <div class="score-label">Clinical Severity</div>
+                                <div class="mt-2">
+                                    <span class="badge bg-info">Elevated</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Clinical Timeline -->
+                    <div class="mb-4">
+                        <h5 class="mb-3"><i class="fas fa-timeline me-2"></i>Clinical Timeline</h5>
+                        <div class="timeline" id="clinicalTimeline">
+                            <!-- Timeline will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Drug Interaction Checker -->
+                    <div class="mt-4">
+                        <h5 class="mb-3"><i class="fas fa-pills me-2"></i>Medication Safety Check</h5>
+                        <div id="drugInteractions">
+                            <!-- Drug interactions will be populated here -->
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary mt-3" id="checkInteractions">
+                            <i class="fas fa-search me-1"></i> Check Drug Interactions
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Differential Diagnosis -->
+            <div class="glass-card mb-5">
+                <div class="card-body p-4">
+                    <h4 class="mb-4"><i class="fas fa-diagnoses me-2"></i>Differential Diagnosis</h4>
+                    <div id="diagnosisList"></div>
+                </div>
+            </div>
+            
+            <!-- Recommendations -->
+            <div class="glass-card mb-5">
+                <div class="card-body p-4">
+                    <h4 class="mb-4"><i class="fas fa-list-check me-2"></i>Clinical Recommendations</h4>
+                    <div id="recommendationsList"></div>
+                </div>
+            </div>
+            
+            <!-- Report Actions -->
+            <div class="d-flex justify-content-between mb-5">
+                <div>
+                    <button class="btn btn-secondary" id="printReportBtn">
+                        <i class="fas fa-print me-2"></i>Generate Printable Report
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-primary" id="exportDataBtn">
+                        <i class="fas fa-file-export me-2"></i>Export Clinical Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Printable Report -->
+        <div id="printableReport" class="printable-report">
+            <!-- Report Header -->
+            <div class="report-header">
+                <div class="report-logo">
+                    <i class="fas fa-brain"></i> NeuroMed AI
+                </div>
+                <h1 class="report-title">Clinical Decision Support Report</h1>
+                <p class="report-subtitle">AI-Powered Clinical Analysis & Recommendations</p>
+                <div class="mt-4">
+                    <p><strong>Report ID:</strong> <span id="reportId">CLIN-2023-001</span></p>
+                    <p><strong>Generated:</strong> <span id="reportDate">November 15, 2023 14:30 UTC</span></p>
+                    <p><strong>AI Model Version:</strong> NeuroMed v2.4.1</p>
+                </div>
+            </div>
+            
+            <!-- Patient Information -->
+            <div class="mb-4">
+                <h4 class="border-bottom pb-2">Patient Information</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Patient ID:</strong> <span id="reportPatientId">--</span></p>
+                        <p><strong>Age:</strong> <span id="reportAge">--</span></p>
+                        <p><strong>Gender:</strong> <span id="reportGender">--</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Assessment Date:</strong> <span id="reportAssessmentDate">--</span></p>
+                        <p><strong>Primary Complaint:</strong> <span id="reportComplaint">--</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vital Signs -->
+            <div class="mb-4">
+                <h4 class="border-bottom pb-2">Vital Signs</h4>
+                <div id="reportVitals"></div>
+            </div>
+            
+            <!-- Risk Assessment -->
+            <div class="mb-4">
+                <h4 class="border-bottom pb-2">Risk Assessment</h4>
+                <div class="alert alert-warning">
+                    <h5 class="alert-heading"><span id="reportRiskLevel">MODERATE RISK</span></h5>
+                    <p id="reportRiskDescription">Patient presents with symptoms requiring further evaluation and monitoring.</p>
+                </div>
+            </div>
+            
+            <!-- Diagnosis -->
+            <div class="mb-4">
+                <h4 class="border-bottom pb-2">Differential Diagnosis</h4>
+                <div id="reportDiagnosis"></div>
+            </div>
+            
+            <!-- Recommendations -->
+            <div class="mb-4">
+                <h4 class="border-bottom pb-2">Clinical Recommendations</h4>
+                <div id="reportRecommendations"></div>
+            </div>
+            
+            <!-- AI Analysis Notes -->
+            <div class="mb-4">
+                <h4 class="border-bottom pb-2">AI Analysis Notes</h4>
+                <p id="reportAnalysisNotes">The AI system analyzed patient data considering symptoms, vital signs, and clinical patterns. This analysis is based on established clinical guidelines and machine learning models trained on diverse medical datasets.</p>
+            </div>
+            
+            <!-- Report Footer -->
+            <div class="report-footer">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="signature-line">
+                            <p>___________________________</p>
+                            <p><strong>Attending Physician</strong></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="signature-line">
+                            <p>___________________________</p>
+                            <p><strong>AI System Verification</strong></p>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-4"><strong>Disclaimer:</strong> This report provides AI-assisted clinical decision support only. All recommendations should be reviewed and verified by qualified healthcare professionals before implementation. NeuroMed AI is not a replacement for professional medical judgment.</p>
+                <p class="mt-3 text-muted small">Report generated by NeuroMed AI Clinical System • Confidential Medical Document</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Global variables
+        let riskChart, vitalsChart;
+        
+        // Enhanced AI/ML Features
+        const symptomAnalyzer = {
+            detectPatterns: (text) => {
+                const patterns = {
+                    cardiac: ['chest', 'pressure', 'tightness', 'radiating', 'shortness', 'diaphoresis', 'palpitations'],
+                    respiratory: ['cough', 'wheeze', 'shortness', 'sob', 'dyspnea', 'breathless', 'sputum'],
+                    neurological: ['headache', 'dizzy', 'vertigo', 'weakness', 'numbness', 'tingling', 'confusion'],
+                    gastrointestinal: ['nausea', 'vomiting', 'abdominal', 'diarrhea', 'constipation', 'heartburn'],
+                    infectious: ['fever', 'chills', 'fatigue', 'malaise', 'sweating']
+                };
+                
+                const detected = [];
+                for (const [category, keywords] of Object.entries(patterns)) {
+                    if (keywords.some(kw => text.toLowerCase().includes(kw))) {
+                        detected.push(category);
+                    }
+                }
+                return detected;
+            },
+            
+            calculateSeverity: (symptoms, vitals) => {
+                let severity = 0;
+                
+                // Symptom-based scoring
+                const severeKeywords = ['severe', 'crushing', 'excruciating', 'worst ever', 'unbearable'];
+                severeKeywords.forEach(keyword => {
+                    if (symptoms.toLowerCase().includes(keyword)) severity += 20;
+                });
+                
+                // Vital-based scoring
+                if (vitals.heart_rate > 120) severity += 15;
+                if (vitals.oxygen_saturation < 92) severity += 25;
+                if (vitals.systolic > 180 || vitals.diastolic > 110) severity += 20;
+                if (vitals.temperature > 38.5) severity += 10;
+                
+                return Math.min(severity, 100);
+            }
+        };
+
+        // Predictive Models
+        const predictiveModels = {
+            wellsPE: (data) => {
+                // Wells criteria for Pulmonary Embolism
+                let score = 0;
+                if (data.symptoms.toLowerCase().includes('dvt')) score += 3;
+                if (data.heart_rate > 100) score += 1.5;
+                if (data.surgery_recent) score += 1.5;
+                if (data.hemoptysis) score += 1;
+                if (data.cancer_active) score += 1;
+                
+                return {
+                    score: score,
+                    probability: score > 6 ? 'High' : score > 2 ? 'Moderate' : 'Low',
+                    interpretation: 'Pulmonary Embolism Risk'
+                };
+            },
+            
+            graceACS: (data) => {
+                // GRACE score for ACS
+                let score = 0;
+                
+                // Age points
+                if (data.age >= 80) score += 100;
+                else if (data.age >= 70) score += 80;
+                else if (data.age >= 60) score += 60;
+                else if (data.age >= 50) score += 40;
+                else if (data.age >= 40) score += 20;
+                
+                // Heart rate points
+                if (data.heart_rate > 120) score += 30;
+                else if (data.heart_rate > 110) score += 20;
+                else if (data.heart_rate > 100) score += 10;
+                
+                // Blood pressure points
+                if (data.systolic < 80) score += 60;
+                else if (data.systolic < 100) score += 40;
+                else if (data.systolic < 120) score += 20;
+                
+                // Additional factors
+                if (data.cardiac_markers) score += 15;
+                if (data.st_changes) score += 30;
+                
+                return {
+                    score: score,
+                    mortality_risk: score > 140 ? 'High' : score > 100 ? 'Moderate' : 'Low',
+                    recommendation: score > 140 ? 'Consider cath lab activation' : 'Medical management'
+                };
+            }
+        };
+
+        // Drug Interaction Database
+        const drugDatabase = {
+            interactions: [
+                { drug1: 'Warfarin', drug2: 'Aspirin', severity: 'high', effect: 'Increased bleeding risk' },
+                { drug1: 'Lisinopril', drug2: 'NSAIDs', severity: 'medium', effect: 'Reduced antihypertensive effect' },
+                { drug1: 'Metformin', drug2: 'Contrast dye', severity: 'high', effect: 'Risk of lactic acidosis' },
+                { drug1: 'Digoxin', drug2: 'Diuretics', severity: 'medium', effect: 'Hypokalemia, digoxin toxicity' },
+                { drug1: 'Statins', drug2: 'Grapefruit juice', severity: 'medium', effect: 'Increased statin levels' }
+            ],
+            
+            checkMedications: (medList) => {
+                const foundInteractions = [];
+                const medications = medList.toLowerCase().split(/[,;]/).map(m => m.trim());
+                
+                drugDatabase.interactions.forEach(interaction => {
+                    const hasDrug1 = medications.some(m => m.includes(interaction.drug1.toLowerCase()));
+                    const hasDrug2 = medications.some(m => m.includes(interaction.drug2.toLowerCase()));
+                    
+                    if (hasDrug1 && hasDrug2) {
+                        foundInteractions.push(interaction);
+                    }
+                });
+                
+                return foundInteractions;
+            }
+        };
+
+        // Update pain level display
+        document.getElementById('pain_level').addEventListener('input', function() {
+            document.getElementById('painValue').textContent = this.value;
+        });
+        
+        // Update vital displays in real-time
+        document.querySelectorAll('.vital-card input').forEach(input => {
+            input.addEventListener('input', function() {
+                updateVitalDisplay(this);
+            });
+        });
+        
+        function updateVitalDisplay(input) {
+            const id = input.id;
+            const value = input.value;
+            const statusElement = input.parentElement.querySelector('.vital-status');
+            
+            switch(id) {
+                case 'heart_rate':
+                    document.getElementById('hrDisplay').textContent = value || '--';
+                    updateStatus(statusElement, value, 60, 100);
+                    break;
+                case 'blood_pressure':
+                    document.getElementById('bpDisplay').textContent = value || '--/--';
+                    if (value) {
+                        const [systolic, diastolic] = value.split('/').map(v => parseInt(v));
+                        updateBPStatus(statusElement, systolic, diastolic);
+                    }
+                    break;
+                case 'temperature':
+                    document.getElementById('tempDisplay').textContent = value || '--';
+                    updateStatus(statusElement, value, 36.1, 37.5);
+                    break;
+                case 'oxygen_saturation':
+                    document.getElementById('oxygenDisplay').textContent = value || '--';
+                    updateStatus(statusElement, value, 95, 100);
+                    break;
+                case 'respiratory_rate':
+                    document.getElementById('respDisplay').textContent = value || '--';
+                    updateStatus(statusElement, value, 12, 20);
+                    break;
+            }
+        }
+        
+        function updateStatus(element, value, min, max) {
+            if (!value) return;
+            const numValue = parseFloat(value);
+            
+            element.classList.remove('status-normal', 'status-warning', 'status-critical');
+            
+            if (numValue >= min && numValue <= max) {
+                element.classList.add('status-normal');
+                element.textContent = 'Normal';
+            } else if ((numValue >= min - (max-min)*0.2 && numValue < min) || 
+                      (numValue > max && numValue <= max + (max-min)*0.2)) {
+                element.classList.add('status-warning');
+                element.textContent = 'Alert';
+            } else {
+                element.classList.add('status-critical');
+                element.textContent = 'Critical';
+            }
+        }
+        
+        function updateBPStatus(element, systolic, diastolic) {
+            if (!systolic || !diastolic) return;
+            
+            element.classList.remove('status-normal', 'status-warning', 'status-critical');
+            
+            if (systolic < 120 && diastolic < 80) {
+                element.classList.add('status-normal');
+                element.textContent = 'Normal';
+            } else if (systolic >= 120 && systolic <= 129 && diastolic < 80) {
+                element.classList.add('status-warning');
+                element.textContent = 'Elevated';
+            } else if ((systolic >= 130 && systolic <= 139) || (diastolic >= 80 && diastolic <= 89)) {
+                element.classList.add('status-warning');
+                element.textContent = 'Stage 1';
+            } else if (systolic >= 140 || diastolic >= 90) {
+                element.classList.add('status-critical');
+                element.textContent = 'Stage 2';
+            }
+        }
+        
+        // Load demo data
+        document.getElementById('demoBtn').addEventListener('click', function() {
+            document.getElementById('patient_id').value = 'MED-2023-156';
+            document.getElementById('age').value = '58';
+            document.getElementById('gender').value = 'male';
+            document.getElementById('weight').value = '85';
+            document.getElementById('height').value = '178';
+            document.getElementById('allergies').value = 'Penicillin, Sulfa drugs';
+            document.getElementById('medications').value = 'Lisinopril 10mg daily, Atorvastatin 20mg daily, Aspirin 81mg';
+            document.getElementById('past_conditions').value = 'Hypertension (10 years), Hyperlipidemia, Type 2 Diabetes, Previous MI (2018)';
+            document.getElementById('symptoms').value = 'Acute onset chest pressure radiating to left arm, shortness of breath, diaphoresis, nausea. Symptoms began 45 minutes ago at rest. Associated with lightheadedness. No relief with rest. Described as "worst chest pain ever".';
+            document.getElementById('pain_level').value = '8';
+            document.getElementById('painValue').textContent = '8';
+            
+            // Vital signs
+            document.getElementById('heart_rate').value = '112';
+            document.getElementById('blood_pressure').value = '158/96';
+            document.getElementById('temperature').value = '37.1';
+            document.getElementById('oxygen_saturation').value = '92';
+            document.getElementById('respiratory_rate').value = '24';
+            
+            // Update all displays
+            document.querySelectorAll('.vital-card input').forEach(input => {
+                updateVitalDisplay(input);
+            });
+        });
+        
+        // Clear all fields
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            document.getElementById('clinicalForm').reset();
+            document.getElementById('painValue').textContent = '1';
+            document.querySelectorAll('.vital-value').forEach(el => el.textContent = '--');
+            document.querySelectorAll('.vital-status').forEach(el => {
+                el.classList.remove('status-warning', 'status-critical');
+                el.classList.add('status-normal');
+                el.textContent = 'Normal';
+            });
+        });
+        
+        // Check drug interactions
+        document.getElementById('checkInteractions').addEventListener('click', function() {
+            const medications = document.getElementById('medications').value;
+            if (!medications.trim()) {
+                alert('Please enter medications to check interactions.');
+                return;
+            }
+            
+            const interactions = drugDatabase.checkMedications(medications);
+            const interactionsDiv = document.getElementById('drugInteractions');
+            interactionsDiv.innerHTML = '';
+            
+            if (interactions.length === 0) {
+                interactionsDiv.innerHTML = '<div class="alert alert-success">No significant drug interactions detected.</div>';
+            } else {
+                interactions.forEach(interaction => {
+                    const severityClass = `interaction-${interaction.severity}`;
+                    const severityBadge = interaction.severity === 'high' ? 'badge bg-danger' : 
+                                          interaction.severity === 'medium' ? 'badge bg-warning' : 'badge bg-info';
+                    
+                    const interactionElement = document.createElement('div');
+                    interactionElement.className = `interaction-card ${severityClass}`;
+                    interactionElement.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${interaction.drug1} + ${interaction.drug2}</h6>
+                                <p class="mb-0 small">${interaction.effect}</p>
+                            </div>
+                            <span class="${severityBadge}">${interaction.severity.toUpperCase()}</span>
+                        </div>
+                    `;
+                    interactionsDiv.appendChild(interactionElement);
+                });
+            }
+        });
+        
+        // Form submission
+        document.getElementById("clinicalForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Show loading, hide results and error
+            document.getElementById("loading").classList.remove("d-none");
+            document.getElementById("error").classList.add("d-none");
+            document.getElementById("result").classList.add("d-none");
+
+            const payload = {
+                patient_id: document.getElementById('patient_id').value,
+                age: Number(document.getElementById('age').value),
+                gender: document.getElementById('gender').value,
+                weight: document.getElementById('weight').value ? Number(document.getElementById('weight').value) : null,
+                height: document.getElementById('height').value ? Number(document.getElementById('height').value) : null,
+                allergies: document.getElementById('allergies').value,
+                medications: document.getElementById('medications').value,
+                past_conditions: document.getElementById('past_conditions').value,
+                symptoms: document.getElementById('symptoms').value,
+                pain_level: Number(document.getElementById('pain_level').value),
+                vitals: {
+                    heart_rate: Number(document.getElementById('heart_rate').value),
+                    blood_pressure: document.getElementById('blood_pressure').value,
+                    temperature: Number(document.getElementById('temperature').value),
+                    oxygen_saturation: Number(document.getElementById('oxygen_saturation').value),
+                    respiratory_rate: document.getElementById('respiratory_rate').value ? Number(document.getElementById('respiratory_rate').value) : null
+                }
+            };
+
+            try {
+                // Simulate API call with delay
+                await new Promise(resolve => setTimeout(resolve, 2500));
+                
+                // Get simulated data
+                const data = simulateAdvancedAnalysis(payload);
+                
+                // Hide loading
+                document.getElementById("loading").classList.add("d-none");
+                
+                // Display results
+                displayAdvancedResults(data, payload);
+                
+                // Update printable report
+                updatePrintableReport(data, payload);
+
+            } catch (err) {
+                document.getElementById("loading").classList.add("d-none");
+                document.getElementById("error").classList.remove("d-none");
+                document.getElementById("errorMessage").textContent = 
+                    "Failed to process clinical data. Please check your connection and try again.";
+                console.error(err);
+            }
+        });
+        
+        function simulateAdvancedAnalysis(payload) {
+            // Enhanced analysis with all features
+            let riskScore = 45;
+            let riskLevel = "LOW";
+            
+            // Calculate risk based on inputs
+            if (payload.vitals.heart_rate > 100) riskScore += 15;
+            if (payload.vitals.oxygen_saturation < 94) riskScore += 20;
+            if (payload.pain_level > 7) riskScore += 15;
+            
+            // Symptom pattern analysis
+            const detectedPatterns = symptomAnalyzer.detectPatterns(payload.symptoms);
+            const severityScore = symptomAnalyzer.calculateSeverity(payload.symptoms, payload.vitals);
+            
+            // Check for cardiac symptoms
+            const cardiacKeywords = ['chest', 'pressure', 'radiating', 'shortness', 'diaphoresis'];
+            const hasCardiacSymptoms = cardiacKeywords.some(keyword => 
+                payload.symptoms.toLowerCase().includes(keyword.toLowerCase())
+            );
+            
+            if (hasCardiacSymptoms) {
+                riskScore += 25;
+                if (payload.vitals.heart_rate > 110) riskScore += 10;
+                if (payload.age > 55) riskScore += 10;
+            }
+            
+            // Determine risk level
+            if (riskScore >= 80) riskLevel = "HIGH";
+            else if (riskScore >= 60) riskLevel = "MODERATE";
+            else riskLevel = "LOW";
+            
+            // Predictive scores
+            const graceScore = predictiveModels.graceACS({
+                age: payload.age,
+                heart_rate: payload.vitals.heart_rate,
+                systolic: payload.vitals.blood_pressure ? parseInt(payload.vitals.blood_pressure.split('/')[0]) : 120,
+                cardiac_markers: hasCardiacSymptoms,
+                st_changes: hasCardiacSymptoms && payload.vitals.heart_rate > 100
+            });
+            
+            const wellsScore = predictiveModels.wellsPE({
+                symptoms: payload.symptoms,
+                heart_rate: payload.vitals.heart_rate,
+                surgery_recent: payload.past_conditions.toLowerCase().includes('surgery'),
+                hemoptysis: payload.symptoms.toLowerCase().includes('cough blood'),
+                cancer_active: payload.past_conditions.toLowerCase().includes('cancer')
+            });
+            
+            // Differential diagnoses
+            const diagnoses = [];
+            if (hasCardiacSymptoms) {
+                diagnoses.push(
+                    { condition: "Acute Coronary Syndrome", probability: 0.65, priority: "HIGH" },
+                    { condition: "GERD/Reflux Esophagitis", probability: 0.25, priority: "MEDIUM" },
+                    { condition: "Musculoskeletal Pain", probability: 0.10, priority: "LOW" }
+                );
+            } else if (detectedPatterns.includes('respiratory')) {
+                diagnoses.push(
+                    { condition: "Community Acquired Pneumonia", probability: 0.45, priority: "MEDIUM" },
+                    { condition: "Acute Bronchitis", probability: 0.35, priority: "LOW" },
+                    { condition: "COVID-19 Infection", probability: 0.20, priority: "HIGH" }
+                );
+            } else {
+                diagnoses.push(
+                    { condition: "Upper Respiratory Infection", probability: 0.45, priority: "LOW" },
+                    { condition: "Viral Syndrome", probability: 0.35, priority: "LOW" },
+                    { condition: "Anxiety/Panic Attack", probability: 0.20, priority: "MEDIUM" }
+                );
+            }
+            
+            // Recommendations
+            const recommendations = [];
+            if (riskLevel === "HIGH") {
+                recommendations.push(
+                    { text: "Immediate ECG and continuous cardiac monitoring", priority: "HIGH" },
+                    { text: "Cardiac enzyme panel (Troponin, CK-MB)", priority: "HIGH" },
+                    { text: "Consult cardiology for urgent evaluation", priority: "HIGH" },
+                    { text: "Administer aspirin 325mg if no contraindications", priority: "HIGH" },
+                    { text: "Consider supplemental oxygen to maintain SpO₂ >94%", priority: "MEDIUM" },
+                    { text: "IV access and fluid resuscitation as needed", priority: "MEDIUM" }
+                );
+            } else if (riskLevel === "MODERATE") {
+                recommendations.push(
+                    { text: "Perform 12-lead ECG", priority: "HIGH" },
+                    { text: "Monitor vital signs every 30 minutes", priority: "MEDIUM" },
+                    { text: "Basic metabolic panel and CBC", priority: "MEDIUM" },
+                    { text: "Consider chest X-ray", priority: "LOW" },
+                    { text: "Pain management with appropriate analgesics", priority: "MEDIUM" }
+                );
+            } else {
+                recommendations.push(
+                    { text: "Routine follow-up in 24-48 hours", priority: "LOW" },
+                    { text: "Over-the-counter analgesics as needed", priority: "LOW" },
+                    { text: "Rest and hydration", priority: "LOW" },
+                    { text: "Return if symptoms worsen", priority: "LOW" }
+                );
+            }
+            
+            return {
+                risk_summary: {
+                    risk_score: riskScore,
+                    risk_level: riskLevel,
+                    confidence: 0.87
+                },
+                grace_score: graceScore,
+                wells_score: wellsScore,
+                severity_score: severityScore,
+                symptom_patterns: detectedPatterns,
+                diagnoses: diagnoses,
+                recommendations: recommendations,
+                analytics: {
+                    risk_factors: ["Cardiac Symptoms", "Tachycardia", "Hypoxia", "Hypertension", "Age >55"],
+                    factor_weights: [30, 20, 25, 15, 10]
+                }
+            };
+        }
+        
+        function displayAdvancedResults(data, payload) {
+            // Show results section
+            document.getElementById("result").classList.remove("d-none");
+            
+            // Update risk score and badge
+            document.getElementById("riskScore").textContent = data.risk_summary.risk_score;
+            const riskBadge = document.getElementById("riskBadge");
+            riskBadge.innerHTML = '';
+            
+            let badgeClass, badgeText;
+            switch(data.risk_summary.risk_level) {
+                case "HIGH":
+                    badgeClass = "bg-danger";
+                    badgeText = "HIGH RISK • URGENT EVALUATION NEEDED";
+                    break;
+                case "MODERATE":
+                    badgeClass = "bg-warning";
+                    badgeText = "MODERATE RISK • TIMELY ASSESSMENT RECOMMENDED";
+                    break;
+                default:
+                    badgeClass = "bg-success";
+                    badgeText = "LOW RISK • ROUTINE FOLLOW-UP";
+            }
+            
+            riskBadge.innerHTML = `<span class="badge ${badgeClass} fs-5 px-4 py-2">${badgeText}</span>`;
+            
+            // Update predictive scores
+            document.getElementById("graceScore").textContent = data.grace_score.score;
+            document.getElementById("wellsScore").textContent = data.wells_score.score;
+            document.getElementById("severityScore").textContent = data.severity_score;
+            
+            // Create charts
+            createCharts(data, payload);
+            
+            // Update clinical timeline
+            updateClinicalTimeline(payload, data);
+            
+            // Check drug interactions automatically
+            if (payload.medications) {
+                const interactions = drugDatabase.checkMedications(payload.medications);
+                updateDrugInteractions(interactions);
+            }
+            
+            // Display diagnoses
+            const diagnosisList = document.getElementById("diagnosisList");
+            diagnosisList.innerHTML = '';
+            
+            data.diagnoses.forEach(diagnosis => {
+                const diagnosisElement = document.createElement('div');
+                diagnosisElement.className = 'recommendation-card mb-3';
+                diagnosisElement.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${diagnosis.condition}</h6>
+                            <div class="d-flex align-items-center">
+                                <div class="progress" style="width: 200px; height: 8px;">
+                                    <div class="progress-bar" style="width: ${diagnosis.probability * 100}%"></div>
+                                </div>
+                                <span class="ms-2">${Math.round(diagnosis.probability * 100)}% probability</span>
+                            </div>
+                        </div>
+                        <span class="priority-badge priority-${diagnosis.priority.toLowerCase()}">${diagnosis.priority}</span>
+                    </div>
+                `;
+                diagnosisList.appendChild(diagnosisElement);
+            });
+            
+            // Display recommendations
+            const recommendationsList = document.getElementById("recommendationsList");
+            recommendationsList.innerHTML = '';
+            
+            data.recommendations.forEach(rec => {
+                const recElement = document.createElement('div');
+                recElement.className = 'recommendation-card mb-3';
+                recElement.innerHTML = `
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <span class="priority-badge priority-${rec.priority.toLowerCase()}">${rec.priority}</span>
+                        </div>
+                        <div>${rec.text}</div>
+                    </div>
+                `;
+                recommendationsList.appendChild(recElement);
+            });
+            
+            // Smooth scroll to results
+            document.getElementById("result").scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function updateClinicalTimeline(payload, data) {
+            const timeline = document.getElementById('clinicalTimeline');
+            const now = new Date();
+            
+            timeline.innerHTML = `
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-danger"></div>
+                    <div class="timeline-content">
+                        <h6>Symptom Onset</h6>
+                        <small class="text-muted">${payload.symptoms.includes('hour') ? '2 hours ago' : 'Time unknown'}</small>
+                        <p>${payload.symptoms.substring(0, 80)}${payload.symptoms.length > 80 ? '...' : ''}</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-warning"></div>
+                    <div class="timeline-content">
+                        <h6>Vitals Recorded</h6>
+                        <small class="text-muted">${payload.vitals.heart_rate ? '1 hour ago' : 'Not recorded'}</small>
+                        <p>HR: ${payload.vitals.heart_rate || '--'}, BP: ${payload.vitals.blood_pressure || '--'}, SpO₂: ${payload.vitals.oxygen_saturation || '--'}%</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-primary"></div>
+                    <div class="timeline-content">
+                        <h6>AI Analysis Complete</h6>
+                        <small class="text-muted">Just now</small>
+                        <p>${data.symptom_patterns.length > 0 ? data.symptom_patterns.join(', ') + ' patterns detected' : 'No specific patterns detected'}</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-success"></div>
+                    <div class="timeline-content">
+                        <h6>Risk Assessment Generated</h6>
+                        <small class="text-muted">Just now</small>
+                        <p>${data.risk_summary.risk_level} risk identified with ${Math.round(data.risk_summary.confidence * 100)}% confidence</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateDrugInteractions(interactions) {
+            const interactionsDiv = document.getElementById('drugInteractions');
+            interactionsDiv.innerHTML = '';
+            
+            if (interactions.length === 0) {
+                interactionsDiv.innerHTML = '<div class="alert alert-success">No significant drug interactions detected.</div>';
+            } else {
+                interactions.forEach(interaction => {
+                    const severityClass = `interaction-${interaction.severity}`;
+                    const severityBadge = interaction.severity === 'high' ? 'badge bg-danger' : 
+                                          interaction.severity === 'medium' ? 'badge bg-warning' : 'badge bg-info';
+                    
+                    const interactionElement = document.createElement('div');
+                    interactionElement.className = `interaction-card ${severityClass}`;
+                    interactionElement.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${interaction.drug1} + ${interaction.drug2}</h6>
+                                <p class="mb-0 small">${interaction.effect}</p>
+                            </div>
+                            <span class="${severityBadge}">${interaction.severity.toUpperCase()}</span>
+                        </div>
+                    `;
+                    interactionsDiv.appendChild(interactionElement);
+                });
+            }
+        }
+        
+        function createCharts(data, payload) {
+            // Destroy existing charts if they exist
+            if (riskChart) riskChart.destroy();
+            if (vitalsChart) vitalsChart.destroy();
+            
+            // Risk Factors Chart
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            riskChart = new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.analytics.risk_factors,
+                    datasets: [{
+                        data: data.analytics.factor_weights,
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(239, 68, 68)',
+                            'rgb(245, 158, 11)',
+                            'rgb(59, 130, 246)',
+                            'rgb(139, 92, 246)',
+                            'rgb(16, 185, 129)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}% weight`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Vital Signs Chart
+            const vitalsCtx = document.getElementById('vitalsChart').getContext('2d');
+            const vitalData = [
+                payload.vitals.heart_rate || 0,
+                payload.vitals.oxygen_saturation || 0,
+                payload.vitals.temperature || 0,
+                payload.vitals.respiratory_rate || 0
+            ];
+            
+            // Normal ranges for reference lines
+            const normalMins = [60, 95, 36.1, 12];
+            const normalMaxs = [100, 100, 37.5, 20];
+            
+            vitalsChart = new Chart(vitalsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Heart Rate', 'O₂ Sat', 'Temp', 'Resp Rate'],
+                    datasets: [
+                        {
+                            label: 'Patient Values',
+                            data: vitalData,
+                            backgroundColor: [
+                                vitalData[0] >= normalMins[0] && vitalData[0] <= normalMaxs[0] ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)',
+                                vitalData[1] >= normalMins[1] && vitalData[1] <= normalMaxs[1] ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)',
+                                vitalData[2] >= normalMins[2] && vitalData[2] <= normalMaxs[2] ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)',
+                                vitalData[3] >= normalMins[3] && vitalData[3] <= normalMaxs[3] ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgb(16, 185, 129)',
+                                'rgb(16, 185, 129)',
+                                'rgb(16, 185, 129)',
+                                'rgb(16, 185, 129)'
+                            ],
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Normal Range',
+                            data: normalMaxs,
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(59, 130, 246, 0.5)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            pointRadius: 0,
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const index = context.dataIndex;
+                                    const value = vitalData[index];
+                                    const min = normalMins[index];
+                                    const max = normalMaxs[index];
+                                    
+                                    if (value < min) return `Below normal range (${min}-${max})`;
+                                    if (value > max) return `Above normal range (${min}-${max})`;
+                                    return `Within normal range (${min}-${max})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updatePrintableReport(data, payload) {
+            // Update report date
+            const now = new Date();
+            document.getElementById('reportDate').textContent = now.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) + ' UTC';
+            
+            // Update patient info
+            document.getElementById('reportPatientId').textContent = payload.patient_id;
+            document.getElementById('reportAge').textContent = payload.age;
+            document.getElementById('reportGender').textContent = payload.gender;
+            document.getElementById('reportAssessmentDate').textContent = now.toLocaleDateString();
+            document.getElementById('reportComplaint').textContent = payload.symptoms.substring(0, 100) + (payload.symptoms.length > 100 ? '...' : '');
+            
+            // Update vitals
+            const vitalsHTML = `
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>Heart Rate:</strong></td>
+                        <td>${payload.vitals.heart_rate || '--'} bpm</td>
+                        <td><strong>Blood Pressure:</strong></td>
+                        <td>${payload.vitals.blood_pressure || '--/--'} mmHg</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Temperature:</strong></td>
+                        <td>${payload.vitals.temperature || '--'} °C</td>
+                        <td><strong>O₂ Saturation:</strong></td>
+                        <td>${payload.vitals.oxygen_saturation || '--'}%</td>
+                    </tr>
+                    ${payload.vitals.respiratory_rate ? `
+                    <tr>
+                        <td><strong>Respiratory Rate:</strong></td>
+                        <td>${payload.vitals.respiratory_rate} breaths/min</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    ` : ''}
+                </table>
+            `;
+            document.getElementById('reportVitals').innerHTML = vitalsHTML;
+            
+            // Update risk assessment
+            document.getElementById('reportRiskLevel').textContent = data.risk_summary.risk_level + " RISK";
+            let riskDesc = "";
+            switch(data.risk_summary.risk_level) {
+                case "HIGH":
+                    riskDesc = "Patient presents with high-risk symptoms requiring immediate medical evaluation and intervention.";
+                    break;
+                case "MODERATE":
+                    riskDesc = "Patient requires timely assessment and monitoring. Further diagnostic evaluation recommended.";
+                    break;
+                default:
+                    riskDesc = "Patient presents with low-risk symptoms. Routine follow-up is recommended.";
+            }
+            document.getElementById('reportRiskDescription').textContent = riskDesc;
+            
+            // Update diagnosis
+            const diagnosisHTML = data.diagnoses.map(d => `
+                <div class="mb-2">
+                    <strong>${d.condition}</strong> 
+                    <span class="badge bg-secondary ms-2">${Math.round(d.probability * 100)}% probability</span>
+                    <span class="badge ${d.priority === 'HIGH' ? 'bg-danger' : d.priority === 'MEDIUM' ? 'bg-warning' : 'bg-secondary'} ms-1">
+                        ${d.priority}
+                    </span>
+                </div>
+            `).join('');
+            document.getElementById('reportDiagnosis').innerHTML = diagnosisHTML;
+            
+            // Update recommendations
+            const recommendationsHTML = data.recommendations.map(r => `
+                <div class="mb-2">
+                    <span class="badge ${r.priority === 'HIGH' ? 'bg-danger' : r.priority === 'MEDIUM' ? 'bg-warning' : 'bg-secondary'} me-2">
+                        ${r.priority}
+                    </span>
+                    ${r.text}
+                </div>
+            `).join('');
+            document.getElementById('reportRecommendations').innerHTML = recommendationsHTML;
+        }
+        
+        // Print report button
+        document.getElementById('printReportBtn').addEventListener('click', function() {
+            document.getElementById('printableReport').style.display = 'block';
+            
+            // Generate a random report ID
+            const reportId = 'CLIN-' + new Date().getFullYear() + '-' + 
+                           Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            document.getElementById('reportId').textContent = reportId;
+            
+            // Wait a moment for display to update, then print
+            setTimeout(() => {
+                window.print();
+                // Hide after printing
+                setTimeout(() => {
+                    document.getElementById('printableReport').style.display = 'none';
+                }, 100);
+            }, 100);
+        });
+        
+        // Export data button
+        document.getElementById('exportDataBtn').addEventListener('click', function() {
+            // Simulate data export
+            const exportData = {
+                patient_id: document.getElementById('patient_id').value,
+                assessment_date: new Date().toISOString(),
+                data_type: 'clinical_assessment',
+                format: 'json'
+            };
+            
+            // Create downloadable JSON file
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `clinical_assessment_${exportData.patient_id}_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            // Show notification
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                Clinical data exported successfully as JSON
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        });
+        
+        // Initialize with some default values for better UX
+        window.addEventListener('DOMContentLoaded', function() {
+            // Set default date for report
+            const now = new Date();
+            document.getElementById('reportDate').textContent = now.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) + ' UTC';
+        });
+    </script>
+</body>
+</html>

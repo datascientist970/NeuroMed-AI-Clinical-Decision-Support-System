@@ -186,28 +186,20 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. **Configure environment variables**
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-4. **Set up database**
+3. **Set up database**
 ```bash
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-5. **Run development server**
+4. **Run development server**
 ```bash
 python manage.py runserver
 ```
 
-6. **Access the application**
+5. **Access the application**
 - Frontend: http://localhost:8000
 - Admin interface: http://localhost:8000/admin
-- API documentation: http://localhost:8000/api/docs
-
 
 ## 🧠 AI Models & Algorithms
 
@@ -292,28 +284,6 @@ Request Body:
 - `/ws/clinical-updates/`: Real-time vital monitoring
 - `/ws/analysis-progress/`: AI processing updates
 - `/ws/alert-notifications/`: Critical alert system
-
-## 📸 Screenshots
-
-### Dashboard Overview
-![Dashboard](https://via.placeholder.com/800x450/0d3b66/ffffff?text=Clinical+Dashboard+Interface)
-*Modern clinical dashboard with vital signs monitoring and risk assessment*
-
-### Patient Assessment
-![Assessment](https://via.placeholder.com/800x450/1a6fb0/ffffff?text=Patient+Assessment+Form)
-*Comprehensive patient intake form with real-time validation*
-
-### Risk Analysis
-![Analysis](https://via.placeholder.com/800x450/00b4b3/ffffff?text=Risk+Analysis+Dashboard)
-*Interactive risk analysis with charts and predictive scores*
-
-### Printable Report
-![Report](https://via.placeholder.com/800x450/8a4fff/ffffff?text=Professional+Clinical+Report)
-*HIPAA-compliant printable clinical report with signatures*
-
-### Drug Interactions
-![Drug Check](https://via.placeholder.com/800x450/10b981/ffffff?text=Drug+Interaction+Checker)
-*Real-time medication safety verification system*
 
 ## 🤝 Contributing
 
